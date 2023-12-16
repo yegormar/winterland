@@ -17,19 +17,15 @@ import winterland.Winterland;
 import winterland.labels.Player;
 
 public class BoardPanel extends JPanel {
-    public Player[] players = new Player[3];
-    public static int playerRedStep = 0;
-    public static int playerWhiteStep = 0;
-    public static int playerBlueStep = 0;
+    public static Player[] players = new Player[3]; // This is array of players
+    public static int[] playerSteps = new int[players.length]; // Index of current step for each player
 
-    private static final int TIMER_DELAY = 200; // 1000 milliseconds = 1 second
-    private static final int JUMP_DISTANCE = 10;
+    private static final int TIMER_DELAY = 1; // 1000 milliseconds = 1 second
+    private static final int JUMP_DISTANCE = 5;
 
     public static int activeNumber = 0;
-
     private boolean jumpUp = true;
-
-    private final int circleSize = 50;
+    private static final int circleSize = 50;
 
     private Image backgroundImage;
 
@@ -42,46 +38,36 @@ public class BoardPanel extends JPanel {
         ImageIcon imageIcon = new ImageIcon("res/background.jpeg");
         backgroundImage = imageIcon.getImage();
 
-//        PlayersPanel playersPanel = new PlayersPanel();
-//        add(playersPanel);
-
+        // Panel with controls
         ControlsPanel controlsPanel = new ControlsPanel();
         add(controlsPanel);
 
-        // Red Player
+        // Prepare Red Player
         ImageIcon red = new ImageIcon("res/payer_red.png");
         Player playerRed = new Player(red);
         players[0] = playerRed;
+        playerSteps[0] = 0;
         add(playerRed);
 
-        // White Player
+        // Prepare White Player
         ImageIcon blue = new ImageIcon("res/payer_blue.png");
         Player playerBlue = new Player(blue);
         players[1] = playerBlue;
+        playerSteps[1] = 0;
         add(playerBlue);
 
-        // Green Player
+        // Prepare Green Player
         ImageIcon green = new ImageIcon("res/payer_green.png");
         Player playerGreen = new Player(green);
         players[2] = playerGreen;
+        playerSteps[2] = 0;
         add(playerGreen);
 
+        // Start timer to show players movements and active player
         Timer timer = new Timer(TIMER_DELAY, new ActionListener() {
-            Player activePlayer = players[activeNumber];
-            private int currentY = activePlayer.getY();
-
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (jumpUp){
-                    currentY = currentY + JUMP_DISTANCE;
-                    jumpUp = false;
-                } else {
-                    currentY = currentY - JUMP_DISTANCE;
-                    jumpUp = true;
-                }
-
-
-                players[activeNumber].setLocation(activePlayer.getX(), currentY);
+                showPlayers();
             }
         });
 
@@ -117,9 +103,36 @@ public class BoardPanel extends JPanel {
         }
     }
 
-    public void movePlayer(int playerIndex, int stepNumber){
-        Step step = Winterland.steps[stepNumber];
-        Player player = players[playerIndex];
-        player.setLocation(step.getX(), step.getY());
+    /*
+     * Show players in the correct circles
+     */
+    public void showPlayers(){
+        for (int i = 0; i < players.length; i++) {
+            Player player = players[i];
+            int stepIndex = playerSteps[i];
+            Step step = Winterland.steps[stepIndex];
+
+            int x = step.getX();
+            int y = step.getY();
+
+            // This is to make active player jump
+            if (i == activeNumber) {
+                if (jumpUp) {
+                    y = y + JUMP_DISTANCE;
+                    jumpUp = false;
+                } else {
+                    y = y - JUMP_DISTANCE;
+                    jumpUp = true;
+                }
+            }
+
+            if (i == 0){
+                player.setLocation(x - 5, y - 5);
+            } else if (i == 1){
+                player.setLocation(x + 20, y - 5);
+            } else {
+                player.setLocation(x + 10, y + 10);
+            }
+        }
     }
 }
