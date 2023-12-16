@@ -17,5 +17,10 @@ class MainWindow extends JFrame {
         add(boardPanel);
 
         setLocationRelativeTo(null); // Center the window on the screen
+
+        // Move players to start location
+        for (int i = 0; i < boardPanel.players.length; i++) {
+            boardPanel.movePlayer(i, 0);
+        }
     }
 }
