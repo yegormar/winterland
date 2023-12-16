@@ -2,14 +2,15 @@ package winterland.labels;
 
 import java.awt.Image;
 import javax.swing.ImageIcon;
-import javax.swing.JLabel;
 
-public class Player extends JLabel {
-    private Image backgroundImage;
+public class Player{
+    private Image image;
 
-    public Player(ImageIcon backgroundIcon) {
-        super(backgroundIcon);
-        this.backgroundImage = backgroundIcon.getImage();
-        setOpaque(false);
+    public Player(ImageIcon image) {
+        this.image = image.getImage();
+    }
+
+    public Image getImage() {
+        return image;
     }
 }

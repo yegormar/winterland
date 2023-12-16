@@ -9,11 +9,13 @@ import java.util.Random;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingWorker;
 
 public class ControlsPanel extends JPanel {
+
     private JLabel dice;
 
-    public ControlsPanel(){
+    public ControlsPanel() {
         setOpaque(false);
 
         setLayout(new FlowLayout(FlowLayout.LEFT));
@@ -25,33 +27,53 @@ public class ControlsPanel extends JPanel {
         roll.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Generated 10 random numbers from 1 to 6
-                Random random = new Random();
-                int number = 1 + random.nextInt(6);
-                dice.setText(Integer.toString(number));
+                // Use SwingWorker for background tasks
+                SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+                    @Override
+                    protected Void doInBackground() throws Exception {
+                        Random random = new Random();
+                        int number = 0;
 
-                // Move active player as many steps as we got in random number
-                for (int i = 0; i < number; i++) {
-                    int currentStep = BoardPanel.playerSteps[BoardPanel.activeNumber];
+                        // Change numbers randomly 10 times to make a roll
+                        for (int i = 0; i < 10; i++) {
+                            number = 1 + random.nextInt(6);
+                            dice.setText(Integer.toString(number));
 
-                    // Move 1 step and wait some time
-                    int newStep = currentStep + 1;
-                    BoardPanel.playerSteps[BoardPanel.activeNumber] = newStep;
-                    repaint();
+                            try {
+                                Thread.sleep(100);
+                            } catch (InterruptedException ex) {
+                                throw new RuntimeException(ex);
+                            }
+                        }
 
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException ex) {
-                        throw new RuntimeException(ex);
+                        // Move active player as many steps as we got in the random number
+                        for (int i = 0; i < number; i++) {
+                            int currentStep = BoardPanel.playerSteps[BoardPanel.activeNumber];
+
+                            // Move 1 step and wait some time
+                            int newStep = currentStep + 1;
+                            BoardPanel.playerSteps[BoardPanel.activeNumber] = newStep;
+                            repaint();
+
+                            try {
+                                Thread.sleep(BoardPanel.TIMER_DELAY * 2);
+                            } catch (InterruptedException ex) {
+                                throw new RuntimeException(ex);
+                            }
+                        }
+
+                        // Make next player active
+                        if (BoardPanel.activeNumber == BoardPanel.players.length - 1) {
+                            BoardPanel.activeNumber = 0;
+                        } else {
+                            BoardPanel.activeNumber++;
+                        }
+
+                        return null;
                     }
-                }
+                };
 
-                // Make next player active
-                if (BoardPanel.activeNumber == BoardPanel.players.length - 1){
-                    BoardPanel.activeNumber = 0;
-                } else {
-                    BoardPanel.activeNumber++;
-                }
+                worker.execute(); // Start the SwingWorker
             }
         });
 

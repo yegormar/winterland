@@ -1,6 +1,5 @@
 package winterland.panels;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
@@ -16,18 +15,20 @@ import winterland.Step;
 import winterland.Winterland;
 import winterland.labels.Player;
 
-public class BoardPanel extends JPanel {
+public class BoardPanel extends JPanel implements ActionListener{
     public static Player[] players = new Player[3]; // This is array of players
     public static int[] playerSteps = new int[players.length]; // Index of current step for each player
 
-    private static final int TIMER_DELAY = 1; // 1000 milliseconds = 1 second
+    public static final int TIMER_DELAY = 250; // 1000 milliseconds = 1 second
     private static final int JUMP_DISTANCE = 5;
 
     public static int activeNumber = 0;
+    private boolean inGame = false;
     private boolean jumpUp = true;
     private static final int circleSize = 50;
 
     private Image backgroundImage;
+    private Timer timer;
 
     public BoardPanel() {
         setSize(1000, 1000);
@@ -47,40 +48,51 @@ public class BoardPanel extends JPanel {
         Player playerRed = new Player(red);
         players[0] = playerRed;
         playerSteps[0] = 0;
-        add(playerRed);
 
         // Prepare White Player
         ImageIcon blue = new ImageIcon("res/payer_blue.png");
         Player playerBlue = new Player(blue);
         players[1] = playerBlue;
         playerSteps[1] = 0;
-        add(playerBlue);
 
         // Prepare Green Player
         ImageIcon green = new ImageIcon("res/payer_green.png");
         Player playerGreen = new Player(green);
         players[2] = playerGreen;
         playerSteps[2] = 0;
-        add(playerGreen);
 
         // Start timer to show players movements and active player
-        Timer timer = new Timer(TIMER_DELAY, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                showPlayers();
-            }
-        });
-
+        // Speed of the snake
+        timer = new Timer(TIMER_DELAY, this);
         timer.start();
+
+        inGame = true;
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
+        if (inGame){
+            doDrawing(g);
+        }
+
+    }
+
+    private void doDrawing(Graphics g) {
+        System.out.println("Called doDrawing()");
+
         // Draw the background image
         g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
 
+        // Show circles
+        drawCircles(g);
+
+        // Show players in the correct circles
+        showPlayers(g);
+    }
+
+    private void drawCircles(Graphics g) {
         // Draw circles on the panel
         Graphics2D g2d = (Graphics2D) g;
 
@@ -106,7 +118,7 @@ public class BoardPanel extends JPanel {
     /*
      * Show players in the correct circles
      */
-    public void showPlayers(){
+    public void showPlayers(Graphics g){
         for (int i = 0; i < players.length; i++) {
             Player player = players[i];
             int stepIndex = playerSteps[i];
@@ -127,12 +139,21 @@ public class BoardPanel extends JPanel {
             }
 
             if (i == 0){
-                player.setLocation(x - 5, y - 5);
+                g.drawImage(player.getImage(), x - 5, y - 5, this);
             } else if (i == 1){
-                player.setLocation(x + 20, y - 5);
+                g.drawImage(player.getImage(), x + 20, y - 5, this);
             } else {
-                player.setLocation(x + 10, y + 10);
+                g.drawImage(player.getImage(), x + 10, y + 10, this);
             }
         }
+    }
+
+    /*
+     * This method is will be called every time when Timer is triggered
+     */
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        System.out.println("Timer action is called");
+        repaint();
     }
 }
